@@ -4,23 +4,37 @@ import { useCategoryData } from '../hooks/useMyCategory';
 import { Row } from 'react-bootstrap';
 import { useProducts } from '../hooks/useProducts';
 import { useDebounce } from '../hooks/useDebounce';
+import { useEffect,useState } from 'react';
 export function ParamFilters() {
   const [searchParams, setSearchParams] = useSearchParams();
   const { data : ct, isError:isErrorC } = useCategoryData();
   const {data :Pd,isError:isErrorP} = useProducts();
-  const handleFilterChange = (filterName, value) => {
+  
     // Create a new URLSearchParams object to modify
     const newSearchParams = new URLSearchParams(searchParams);
 
-    if (value) {
-      newSearchParams.set(filterName, value);
-    } else {
-      newSearchParams.delete(filterName);
-    }
+    // Local state for instant UI feedback
+  const [searchValue, setSearchValue] = useState(
+    searchParams.get('q') || ''
+  );
+  
+  // Debounced value from the local state
+  const debouncedSearchValue = useDebounce(searchValue, 500); // 500ms delay
 
+  useEffect(() => {
+    const newSearchParams = new URLSearchParams(searchParams);
+    if (debouncedSearchValue) {
+      newSearchParams.set('search', debouncedSearchValue);
+    } else {
+      newSearchParams.delete('search');
+    }
     setSearchParams(newSearchParams, { replace: true });
+    // The effect runs when the debounced value changes, updating the URL
+  }, [debouncedSearchValue, searchParams, setSearchParams]);
+const handleChange = (e) => {
+    setSearchValue(e.target.value);
   };
-  const debouncedSearch = useDebounce(searchParams.get('search') || '', 600);
+
   if(isErrorC || isErrorP) return <div>Error loading data</div>;
   return (
     <div>
@@ -28,8 +42,8 @@ export function ParamFilters() {
           <input
           type="text"
           name="search"
-          value={searchParams.get('search') || ''}
-          onChange={(e)=>handleFilterChange('search',e.target.value)}
+          value={searchValue}
+          onChange={handleChange}
           placeholder="Search..."
           className="border p-2 rounded"
         />
@@ -37,7 +51,7 @@ export function ParamFilters() {
         
       <select
         value={searchParams.get('category') || ''}
-        onChange={(e) => handleFilterChange('category', e.target.value)}
+        onChange={(e) => handleChange('category', e.target.value)}
       >
         <option value="">All Categories</option>
         {ct?.map((cat) => (
@@ -66,4 +80,5 @@ export function ParamFilters() {
    
   );
 }
+
 export default ParamFilters

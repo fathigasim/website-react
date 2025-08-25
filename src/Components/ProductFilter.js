@@ -16,7 +16,7 @@ const ProductFilter = () => {
     const [pageNumber, setPageNumber] = useState(1);
     const [pageSize] = useState(5);
 
-    const [categories, setCategories] = useState([]);
+    
     const [selectedCategories, setSelectedCategories] = useState([]);
     const [searchTerm, setSearchTerm] = useState('');
     const [minPrice, setMinPrice] = useState('');

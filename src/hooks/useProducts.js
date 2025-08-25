@@ -5,14 +5,16 @@ import axios from 'axios';
 
 const fetchProducts = async ({ queryKey }) => {
   const [_key, filters] = queryKey;
-  const { search,category
+  const { search,category, pageNumber, pageSize
     // , sortBy, minPrice, maxPrice 
 } = filters;
 
   const response = await axios.get(`https://localhost:7228/api/Product/ParamsFilter`, {
     params: {
         search,
-      category
+      category,
+      pageNumber,
+      pageSize,
     //   ,
     //   sortBy,
     //   minPrice,
@@ -30,6 +32,8 @@ export function useProducts() {
   const filters = {
     search: searchParams.get('search') || '',
     category: searchParams.get('category') || '',
+    pageNumber: parseInt(searchParams.get('pageNumber')) || 1,
+    pageSize: parseInt(searchParams.get('pageSize')) || 5,
     // sortBy: searchParams.get('sortBy') || 'newest',
     // minPrice: searchParams.get('minPrice') || '',
     // maxPrice: searchParams.get('maxPrice') || '',

@@ -61,7 +61,7 @@ const NavigationBar = () => {
               </CNavItem>
               <CDropdown variant="nav-item" popper={false}>
                 <CDropdownToggle>Dropdown link</CDropdownToggle>
-                <CDropdownMenu  style={{backgroundColor: '#acbacf',hover: '#b0c4d6'}}>
+                <CDropdownMenu id="dropdownId"  >
                   <CDropdownItem href="#">Action</CDropdownItem>
                   <CDropdownItem href="#">Another action</CDropdownItem>
                   <CDropdownDivider />
