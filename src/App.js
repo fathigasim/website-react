@@ -19,7 +19,9 @@ import AddProduct from './Components/AddProduct';
 import CustomFilter from './Components/CustomFilter';
 import ParamsFilter from './Components/ParamsFilter';
 import ParamFilters2 from './Components/ParamsFilter2';
-
+import ResetPassword from './Components/PasswordManager/ResetPassword';
+import ForgotPassword from './Components/PasswordManager/ForgotPassword';
+import NotFound from './Components/NotFound';
 
 function App() {
    const navigate = useNavigate();
@@ -42,6 +44,9 @@ function App() {
       <Route path='/filterp' element={<ParamsFilter/>} />
       <Route path='/filter2' element={<ParamFilters2/>} />
      <Route path='/forbiden' element={<Forbiden />} />
+     <Route path='*' element={<NotFound />} />
+     <Route path='/forgotPassword' element={<ForgotPassword/>} />
+     <Route path='/resetPassowrd' element={<ResetPassword />} />
      
      </Routes>
      

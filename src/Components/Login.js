@@ -11,6 +11,7 @@ import { useState,useEffect } from "react";
 import { useNavigate, useLocation,useSearchParams  } from "react-router-dom";
 import { BsBoxArrowInRight } from 'react-icons/bs';
 import { useForm } from 'react-hook-form';
+import { Link } from "react-router-dom";
 import axiosInstance from "../hooks/axiosInstance";
 
 const Login = () => {
@@ -166,7 +167,7 @@ const Login = () => {
               
               {isSubmitSuccessful && <p>Form submitted successfully!</p>}
             </Card.Body>
-
+             <Link to='/forgotPassword'>Forgot Password !</Link>
           </Card>
         </Col>
       </Row>
