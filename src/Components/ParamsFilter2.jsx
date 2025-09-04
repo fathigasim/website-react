@@ -10,11 +10,12 @@ import SmartPagination from './SmartPagination';
 import { useQuery } from '@tanstack/react-query';
 import axios from 'axios';
 import SmartPagination2 from './SmartPagination2';
+import axiosInstance from '../hooks/axiosInstance';
 
 const fetchProducts = async ({ queryKey }) => {
   const [_key, params] = queryKey;
 
-  const res = await axios.get("https://localhost:7228/api/product/ParamsFilter", {
+  const res = await axiosInstance.get("/api/product/ParamsFilter", {
     params,
   });
   return res.data;

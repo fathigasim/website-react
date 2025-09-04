@@ -22,6 +22,13 @@ import ParamFilters2 from './Components/ParamsFilter2';
 import ResetPassword from './Components/PasswordManager/ResetPassword';
 import ForgotPassword from './Components/PasswordManager/ForgotPassword';
 import NotFound from './Components/NotFound';
+import ChecKOut from './Components/ChecKOut';
+import BasketReport from './Components/Reports/BasketReport';
+import Success from './Components/Success';
+import Cancel from './Components/Cancel';
+import OrderList from './Components/OrderList'; 
+import CheckoutButton from './Components/CheckoutButton';
+import CardStyle from './Components/CardStyle';
 
 function App() {
    const navigate = useNavigate();
@@ -43,6 +50,13 @@ function App() {
       <Route path='/filter' element={<CustomFilter/>} />
       <Route path='/filterp' element={<ParamsFilter/>} />
       <Route path='/filter2' element={<ParamFilters2/>} />
+         <Route path='/checkOut' element={<ChecKOut/>} />
+         <Route path='/Cart' element={<CardStyle/>} />
+
+         <Route path='/orderList/:Id' element={<OrderList/>} />
+         <Route path='/success' element={<Success/>} />
+         <Route path='/cancel' element={<Cancel/>} />
+         <Route path='/basketReport' element={<BasketReport/>} />
      <Route path='/forbiden' element={<Forbiden />} />
      <Route path='*' element={<NotFound />} />
      <Route path='/forgotPassword' element={<ForgotPassword/>} />

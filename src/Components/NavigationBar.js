@@ -10,6 +10,7 @@
  import { useTranslation } from "react-i18next";
 // import { BsPerson,BsBoxArrowRight  } from "react-icons/bs";
 // import 'bootstrap/dist/css/bootstrap.min.css';
+
 import {
   CCollapse,
   CContainer,
@@ -25,6 +26,7 @@ import {
   CNavItem,
   CNavLink,
 } from '@coreui/react'
+import BasketSummery from "./BasketSummery";
 
 const NavigationBar = () => {
  const [visible, setVisible] = useState(false)
@@ -40,6 +42,7 @@ const NavigationBar = () => {
   
         <CContainer fluid>
           <LanguageSelector />
+     
           <CNavbarBrand href="#">Navbar</CNavbarBrand>
           <CNavbarToggler
             aria-label="Toggle navigation"
@@ -78,7 +81,7 @@ const NavigationBar = () => {
                  
                 </CNavLink>
                  <CNavLink href="#" className="d-flex me-2" >
-                 
+                   <BasketSummery/>
                 </CNavLink>
                  <CNavLink href="#" className="d-flex me-2" >
                   {/* {console.log(user)} */}

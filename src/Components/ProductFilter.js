@@ -2,12 +2,16 @@ import React, { useEffect, useState } from 'react';
 import axios from 'axios'
 import PaginationComponent from './Pagination/PaginationComponent';
 import { useSearchParams } from 'react-router-dom';
-import { Table, Container, Form, Row, Col, Button } from 'react-bootstrap';
+import { Table, Container, Form, Row, Col, Button,InputGroup } from 'react-bootstrap';
 import { BsSearch } from 'react-icons/bs';
 import axiosInstance from '../hooks/axiosInstance';
 import Card from 'react-bootstrap/Card';
 import { useCategoryData } from '../hooks/useMyCategory';
+import BasketList from './BasketList';
+import { useQuery,useMutation,useQueryClient } from '@tanstack/react-query';
+import { useForm } from 'react-hook-form';
 const ProductFilter = () => {
+  const queryClient=useQueryClient();
     const {data,isError}=useCategoryData();
     const [searchParams] = useSearchParams();
   const searchTerms = searchParams.get('q');
@@ -21,6 +25,8 @@ const ProductFilter = () => {
     const [searchTerm, setSearchTerm] = useState('');
     const [minPrice, setMinPrice] = useState('');
     const [maxPrice, setMaxPrice] = useState('');
+    
+    // const [prodId,setProdId]=useState('');
     // useEffect(() => {
     //     fetchCategories();
     // }, []);
@@ -40,7 +46,7 @@ const ProductFilter = () => {
     const fetchData = async () => {
           
         try {
-            const res = await axios.get(`https://localhost:7228/api/Product/ProductFilter`,{
+            const res = await axiosInstance.get(`/api/Product/ProductFilter`,{
                 params: {
                     pageNumber,
                     pageSize,
@@ -91,11 +97,46 @@ const ProductFilter = () => {
         setPageNumber(1);
 //        fetchData();
     };
+
+
+const handleAddToCart = async (prodId,inputQnt) => {
+  try {
+    await axiosInstance.post("/api/Basket/AddToBasket", 
+      {prodId:Number(prodId),inputQnt:Number(inputQnt)}
+    ,{
+        headers: {
+          "Content-Type": "application/json", // 👈 very important
+          
+        },
+        withCredentials: true,
+      });
+    alert("Product added to cart");
+  } catch (err) {
+    console.error("AddToCart error:", err.response?.data || err.message);
+    alert("Failed to add product");
+  }
+};
+
+const addCartMut=useMutation({
+      mutationFn:({ prodId, inputQnt })=>handleAddToCart(prodId,inputQnt), onSuccess:()=>{
+          queryClient.invalidateQueries(['basketList']);
+          queryClient.invalidateQueries(['basketsummery']);
+           reset();
+// alert("Product added successfully!");
+      },
+      onError:(error)=>{
+        console.log(error)
+        alert("Some went wrong !!!");
+       // reset();
+      }
+    })
+  // react-hook-form
+  const { register, handleSubmit, reset,setError, formState: { errors,isSubmitting,isSubmitSuccessful} } = useForm();
     if(isError) return <div>Some went wrong</div>
   return (
     <>
      <Container className="mt-4 mb-4" style={{marginBottom:'20px !important',bottom:'20px !important'}}>
-        
+          <Row className='mb-2'><BasketList/></Row>
             <Row className="mb-3">
                 <Col md={3}>
                     <Form.Control
@@ -109,7 +150,7 @@ const ProductFilter = () => {
                 <Col md={3}>
                {/* { console.log(data)} */}
                     <Form.Label>Categories</Form.Label>
-                    {data.map((cat) => (
+                    {data?.map((cat) => (
                         <Form.Check 
                             key={cat.categoryId}
                             type="checkbox"
@@ -129,42 +170,48 @@ const ProductFilter = () => {
             </Row>
         <Row className="mb-3">
 {products.map((product) => (
+  <Card key={product.goodsId} style={{ width: '16rem', margin:'1rem', border: '1px solid #faf8f8ff' }}>
+    <Card.Img 
+      variant="top" 
+      style={{width: '100%', height:'10rem'}} 
+      src={product.imgSrc} 
+      alt={product.goodsName} 
+    />
+    <Card.Body>
+      <Card.Title>{product.goodsName}</Card.Title>
+      <Card.Text>{product.goodsDetail}</Card.Text>
 
-<Card key={product.goodsId} style={{ width: '16rem',margin:'1rem',border: '1px solid #faf8f8ff' }}>
-      <Card.Img variant="top" style={{width: '100%',height:'10rem'}} src={product.imgSrc} alt="Card image cap" />
-      <Card.Body>
-        <Card.Title>{product.goodsName}</Card.Title>
-        <Card.Text>
-         {product.goodsDetail}
-        </Card.Text>
-      </Card.Body>
-    </Card>
+      <Form
+        onSubmit={(e) => {
+          e.preventDefault();
+          const qnt = parseInt(e.target.elements[`qnt-${product.goodsId}`].value, 10);
+          if (!qnt || qnt <= 0) {
+            alert("Please enter a valid quantity");
+            return;
+          }
+          addCartMut.mutate({ prodId: product.goodsId, inputQnt: qnt });
+          e.target.reset(); // reset only this form
+        }}
+      >
+        <Form.Control
+          type="number"
+          name={`qnt-${product.goodsId}`}
+          placeholder="Qty"
+          min="1"
+          required
+          className="mb-2"
+        />
+        <Button type="submit" variant="primary" size="sm" disabled={addCartMut.isLoading}>
+          {addCartMut.isLoading ? "Adding..." : "Add To Cart"}
+        </Button>
+      </Form>
+    </Card.Body>
+  </Card>
 ))}
+
         </Row>
 
-            {/* <h2>Products</h2>
-            <Table bordered hover>
-                <thead>
-                    <tr>
-                        
-                        <th>Name</th>
-                        <th>Category</th>
-                        <th>Details</th>
-                        <th>Image</th>
-                        
-                    </tr>
-                </thead>
-                <tbody>
-                    {products.map((p) => (
-                        <tr key={p.goodsId}>
-                            <td>{p.goodsName}</td>
-                            <td>{p.category.categoryName}</td>
-                            <td>{p.goodsDetail}</td>
-                            <td><img src={p.imgSrc} alt='avatar'></img></td>
-                        </tr>
-                    ))}
-                </tbody>
-            </Table> */}
+            
 
             <PaginationComponent
                 totalItems={totalItems}

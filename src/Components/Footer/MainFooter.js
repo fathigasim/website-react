@@ -3,7 +3,7 @@ import { CFooter, CLink } from '@coreui/react'
 const MainFooter = () => {
   return (
     //  backgroundColor: '#f8f9fa'
-    <CFooter style={{position: 'absolute', bottom: 0, width: '100%',marginTop: '20px !important', backgroundColor: '#acbacf'}}>
+    <CFooter style={{position: 'fixed', bottom: 0, width: '100%',marginTop: '20px !important', backgroundColor: '#acbacf'}}>
   <div>
     <CLink href="https://coreui.io">CoreUI</CLink>
     <span>&copy; 2025 creativeLabs.</span>
