@@ -81,7 +81,7 @@ const NavigationBar = () => {
                  
                 </CNavLink>
                  <CNavLink href="#" className="d-flex me-2" >
-                   <BasketSummery/>
+                   {/* <BasketSummery/> */}
                 </CNavLink>
                  <CNavLink href="#" className="d-flex me-2" >
                   {/* {console.log(user)} */}
