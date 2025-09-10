@@ -6,7 +6,7 @@ import axiosInstance from '../hooks/axiosInstance';
 const BasketSummery = () => {
 const   fetchBasketSummery =async()=>{
 try{ 
-const res= await axiosInstance.get(`/api/Basket/BasketSummery`,{withCredentials:true})
+const res= await axios.get(`https://localhost:7228/api/Basket/BasketSummery`,{withCredentials:true})
 // .then((res)=>{
 //   console.log(res.data)
   return res.data; 

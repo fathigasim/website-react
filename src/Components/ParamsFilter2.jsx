@@ -1,15 +1,17 @@
 // components/ProductFilters.js
 import { useSearchParams } from 'react-router-dom';
 import { useCategoryData } from '../hooks/useMyCategory';
-import { Container, Row } from 'react-bootstrap';
+import { Container, Row,Form,Card,Button } from 'react-bootstrap';
 import { useProducts } from '../hooks/useProducts';
 import { useDebounce } from '../hooks/useDebounce';
 import { useEffect, useState } from 'react';
 import PaginationComponent from './Pagination/PaginationComponent';
 import SmartPagination from './SmartPagination';
-import { useQuery } from '@tanstack/react-query';
+import { useQuery,useQueryClient,useMutation } from '@tanstack/react-query';
 import axios from 'axios';
 import SmartPagination2 from './SmartPagination2';
+import '../product.css'
+
 import axiosInstance from '../hooks/axiosInstance';
 
 const fetchProducts = async ({ queryKey }) => {
@@ -18,10 +20,12 @@ const fetchProducts = async ({ queryKey }) => {
   const res = await axiosInstance.get("/api/product/ParamsFilter", {
     params,
   });
+  console.log(res.data)
   return res.data;
 };
 
 export function ParamFilters() {
+  const queryClient=useQueryClient();
      const [searchParams, setSearchParams] = useSearchParams();
 
   // 🔹 Local state for search input (not directly URL bound)
@@ -30,7 +34,7 @@ export function ParamFilters() {
 
   // 🔹 Extract filters from URL (with defaults)
   const pageNumber = parseInt(searchParams.get("pageNumber") || "1", 10);
-  const pageSize = parseInt(searchParams.get("pageSize") || "4", 10);
+  const pageSize = parseInt(searchParams.get("pageSize") || "8", 10);
   // const sort = searchParams.get("sort") || "name";
   const category = searchParams.get("category") || "";
 
@@ -63,6 +67,36 @@ export function ParamFilters() {
     setSearchParams(updated);
   };
    const totalPages = Math.ceil(data?.totalItems/data?.pageSize);
+const handleAddToCart = async (prodId,inputQnt) => {
+  try {
+    await axiosInstance.post("/api/Basket/AddToBasket", 
+      {prodId:Number(prodId),inputQnt:Number(inputQnt)}
+    ,{
+        headers: {
+          "Content-Type": "application/json", // 👈 very important
+          
+        },
+        withCredentials: true,
+      });
+    alert("Product added to cart");
+  } catch (err) {
+    console.error("AddToCart error:", err.response?.data || err.message);
+    alert("Failed to add product");
+  }
+};
+   const addCartMut=useMutation({
+         mutationFn:({ prodId, inputQnt })=>handleAddToCart(prodId,inputQnt), onSuccess:()=>{
+             queryClient.invalidateQueries(['basketList']);
+             queryClient.invalidateQueries(['basketsummery']);
+              // reset();
+   // alert("Product added successfully!");
+         },
+         onError:(error)=>{
+           console.log(error)
+           alert("Some went wrong !!!");
+          // reset();
+         }
+       })
   // 🔹 Loading / error UI
   if (isLoading) return <p>Loading...</p>;
   if (isError) return <p>Something went wrong!</p>;
@@ -102,14 +136,65 @@ export function ParamFilters() {
       </div>
 
       {/* Product List */}
-      {data.items ? (<ul className="border rounded">
-        { data.items.map((product) => (
-          <li key={product.goodsId} className="border-b p-3 flex justify-between">
-            <span>{product.goodsName}</span>
-            <span>{product.goodsDetail}</span>
-          </li>
-        ))}
-      </ul>):('no data found sorry')}
+      {data.items ? (
+        <Container>
+    <div className="card-grid">
+      {data?.items?.map((product) => (
+        <Card
+          key={product.goodsId}
+          className="h-100 shadow-sm"
+          style={{ border: "1px solid #faf8f8ff" }}
+        >
+          <Card.Img
+            variant="top"
+            style={{ width: "100%", height: "10rem", objectFit: "cover" }}
+            src={product.imgSrc}
+            alt={product.goodsName}
+          />
+          <Card.Body className="d-flex flex-column">
+            <Card.Title>{product.goodsName}</Card.Title>
+            <Card.Text className="flex-grow-1">{product.goodsDetail}</Card.Text>
+
+            <Form
+              onSubmit={(e) => {
+                e.preventDefault();
+                const qnt = parseInt(
+                  e.target.elements[`qnt-${product.goodsId}`].value,
+                  10
+                );
+                if (!qnt || qnt <= 0) {
+                  alert("Please enter a valid quantity");
+                  return;
+                }
+                addCartMut.mutate({ prodId: product.goodsId, inputQnt: qnt });
+                e.target.reset();
+              }}
+            >
+              <Form.Control
+                type="number"
+                name={`qnt-${product.goodsId}`}
+                placeholder="Qty"
+                min="1"
+                required
+                className="mb-2"
+              />
+              <Button
+                type="submit"
+                variant="primary"
+                size="sm"
+                disabled={addCartMut.isLoading}
+                className="w-100"
+              >
+                {addCartMut.isLoading ? "Adding..." : "Add To Cart"}
+              </Button>
+            </Form>
+
+          </Card.Body>
+        </Card>
+      ))}
+    </div>
+    </Container>
+    ):('no data found sorry')}
       
 
      {/* Pagination */}

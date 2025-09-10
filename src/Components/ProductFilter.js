@@ -135,7 +135,7 @@ const addCartMut=useMutation({
     if(isError) return <div>Some went wrong</div>
   return (
     <>
-     <Container className="mt-4 mb-4" style={{marginBottom:'20px !important',bottom:'20px !important'}}>
+     <Container className="mt-4" >
           <Row className='mb-2'><BasketList/></Row>
             <Row className="mb-3">
                 <Col md={3}>
@@ -170,16 +170,22 @@ const addCartMut=useMutation({
             </Row>
         <Row className="mb-3">
 {products.map((product) => (
-  <Card key={product.goodsId} style={{ width: '16rem', margin:'1rem', border: '1px solid #faf8f8ff' }}>
+  <Col key={product.goodsId}
+      sm={12}
+      md={6}
+      lg={4}
+      className="mb-4 d-flex">
+  <Card   className="h-100 w-100 shadow-sm"
+        style={{ border: "1px solid #faf8f8ff" }}>
     <Card.Img 
-      variant="top" 
-      style={{width: '100%', height:'10rem'}} 
-      src={product.imgSrc} 
-      alt={product.goodsName} 
+      variant="top"
+          style={{ width: "100%", height: "10rem", objectFit: "cover" }}
+          src={product.imgSrc}
+          alt={product.goodsName}
     />
-    <Card.Body>
+    <Card.Body className="d-flex flex-column">
       <Card.Title>{product.goodsName}</Card.Title>
-      <Card.Text>{product.goodsDetail}</Card.Text>
+      <Card.Text className="flex-grow-1">{product.goodsDetail}</Card.Text>
 
       <Form
         onSubmit={(e) => {
@@ -207,6 +213,7 @@ const addCartMut=useMutation({
       </Form>
     </Card.Body>
   </Card>
+  </Col>
 ))}
 
         </Row>
