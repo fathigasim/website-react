@@ -23,7 +23,7 @@ import ResetPassword from './Components/PasswordManager/ResetPassword';
 import ForgotPassword from './Components/PasswordManager/ForgotPassword';
 import NotFound from './Components/NotFound';
 import ChecKOut from './Components/ChecKOut';
-import BasketReport from './Components/Reports/BasketReport';
+import OrderReport from './Components/Reports/OrderReport';
 import Success from './Components/Success';
 import Cancel from './Components/Cancel';
 import OrderList from './Components/OrderList'; 
@@ -44,19 +44,23 @@ function App() {
      <Route path='/login' element={<Login />} />
      <Route path='/' element={<MainPage />} />
      
-     <Route path='/FilterProduct' element={<ProductFilter/>} />
-      <Route path='/Category' element={<ProtectedRoute><Category/></ProtectedRoute> } />
+    
+      <Route path='/Category' element={<Category/> } />
       <Route path='/Add' element={<AddProduct/>} />
       <Route path='/filter' element={<CustomFilter/>} />
       <Route path='/filterp' element={<ParamsFilter/>} />
+      {/* Protected section */}
+        <Route element={<ProtectedRoute />}>
       <Route path='/filter2' element={<ParamFilters2/>} />
+       <Route path='/FilterProduct' element={<ProductFilter/>} />
+       </Route>
          <Route path='/checkOut' element={<ChecKOut/>} />
          <Route path='/Cart' element={<CardStyle/>} />
 
          <Route path='/orderList/:Id' element={<OrderList/>} />
          <Route path='/success' element={<Success/>} />
          <Route path='/cancel' element={<Cancel/>} />
-         <Route path='/basketReport' element={<BasketReport/>} />
+         <Route path='/orderReport' element={<OrderReport/>} />
      <Route path='/forbiden' element={<Forbiden />} />
      <Route path='*' element={<NotFound />} />
      <Route path='/forgotPassword' element={<ForgotPassword/>} />

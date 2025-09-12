@@ -22,7 +22,7 @@ const Success = () => {
 
     updateOrder();
   }, [Id]);
-  return(<h1>✅ Payment Successful!</h1>) ;
+  return(<h1 style={{alignContent:'center',justifyContent:'center'}}>✅ Payment Successful!</h1>) ;
 };
 
 export default Success;

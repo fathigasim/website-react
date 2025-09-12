@@ -22,18 +22,19 @@ const OrderList = () => {
   })
   console.log(orderIdQuery.data)
   return (
-    <div>
+    <>
       
       {orderIdQuery.data&&
       
-      <Container>
+      <Container className='mt-5'>
  
   <Row>
 
      <Table striped bordered hover>
       <thead>
         <tr>
-          
+          <th>Customer</th>
+          <th>email</th>
           <th>Order Sequence</th>
           <th>Order Status</th>
           <th>Payment</th>
@@ -44,12 +45,45 @@ const OrderList = () => {
       
 
                  <tr >
-          
+          <td>{orderIdQuery.data.register.name}</td>
+          <td>{orderIdQuery.data.register.email}</td>
           <td>{orderIdQuery.data.ordSeq}</td>
           <td>{orderIdQuery.data.orderStatus}</td>
-          <td><CheckoutButton Id={orderIdQuery.data.id}/></td> 
+          <td><CheckoutButton Id={orderIdQuery.data.id} style={{color:'blue'}}/></td> 
            {/* send orderId to checkout component*/}
         </tr>
+  
+      
+      </tbody>
+    </Table>
+    </Row>
+    <Row>
+
+     <Table striped bordered hover>
+      <thead>
+        <tr>
+          
+          <th>Product</th>
+          <th>Quantity</th>
+          
+        </tr>
+      </thead>
+      <tbody>
+       
+      
+   {orderIdQuery.data.orderItems&&
+   orderIdQuery.data?.orderItems?.map((items,index)=>(
+    
+    <tr key={items.orderItemId}>
+    <td>{items.goods.goodsName}</td>
+    <td>{items.quantity}</td>
+    </tr>
+   ))}
+                
+          
+        
+           {/* send orderId to checkout component*/}
+    
   
       
       </tbody>
@@ -58,7 +92,7 @@ const OrderList = () => {
     </Container>
       }
       
-    </div>
+    </>
   )
 }
 

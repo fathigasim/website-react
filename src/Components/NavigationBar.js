@@ -33,9 +33,9 @@ const NavigationBar = () => {
   const navigate = useNavigate();
         const { t } = useTranslation("navbar");
 
-   const { isAuthenticated,logout } = useAuth();
+   const { isAuthenticated,logout,user } = useAuth();
    
-    
+    console.log(user?.name);
   return (
       // className="bg-body-tertiary"
  <CNavbar expand="lg"  variant="dark" style={{backgroundColor: '#acbacf'}}>
@@ -88,10 +88,15 @@ const NavigationBar = () => {
                 </CNavLink>
                        {isAuthenticated&&localStorage.getItem('token')&&  (
           <>
-            <CNavLink className="d-flex me-2"></CNavLink>
-            <CNavLink className="d-flex me-2" onClick={logout}>
+            
+            {isAuthenticated&&
+            <>
+            <CNavLink className="d-flex me-2">{user?.name}</CNavLink>
+            <CNavLink className="d-flex me-2" onClick={() => logout("manual")}>
               Logout
             </CNavLink>
+            </>
+            }
           </>
         )}
 

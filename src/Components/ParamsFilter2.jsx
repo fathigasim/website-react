@@ -101,9 +101,10 @@ const handleAddToCart = async (prodId,inputQnt) => {
   if (isLoading) return <p>Loading...</p>;
   if (isError) return <p>Something went wrong!</p>;
   return (
+    <Container className="mt-4 mb-4" style={{paddingBottom: "60px",marginBottom:'20px !important',bottom:'20px !important'}}>
   <div className="p-6 max-w-2xl mx-auto">
       {/* Filters */}
-      <div className="flex gap-2 mb-4">
+      <div className="d-flex gap-2 mb-4">
         {/* Search */}
         <input
           type="text"
@@ -232,7 +233,7 @@ const handleAddToCart = async (prodId,inputQnt) => {
 </div>
 
       </div>
-    
+    </Container>
       )}
   
     

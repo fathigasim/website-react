@@ -135,7 +135,7 @@ const addCartMut=useMutation({
     if(isError) return <div>Some went wrong</div>
   return (
     <>
-     <Container className="mt-4" >
+     <Container className="mt-4" style={{paddingBottom: "60px",marginBottom:'20px !important',bottom:'20px !important'}}>
           <Row className='mb-2'><BasketList/></Row>
             <Row className="mb-3">
                 <Col md={3}>
@@ -207,7 +207,7 @@ const addCartMut=useMutation({
           required
           className="mb-2"
         />
-        <Button type="submit" variant="primary" size="sm" disabled={addCartMut.isLoading}>
+        <Button type="submit" variant="primary" size="md" style={{width:'100%'}} disabled={addCartMut.isLoading}>
           {addCartMut.isLoading ? "Adding..." : "Add To Cart"}
         </Button>
       </Form>

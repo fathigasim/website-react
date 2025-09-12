@@ -1,8 +1,18 @@
-import React from 'react'
+import React,{useState,useEffect} from 'react'
 import jsPDF from "jspdf";
 import html2canvas from "html2canvas";
-const BasketReport = () => {
+import axios from 'axios';
+const OrderByDateReport = () => {
+     const [OrderData,setOrderData]=useState([]);
+      useEffect(()=>{
+       axios.get(`https://localhost:7228/api/Report/OrderReport`).then(res=>{
+    
+        console.log(res.data);
+            setOrderData(res.data)
+       })
+      },[])
     const generatePDF = async () => {
+   
     const input = document.getElementById("pdf-content");
 
     // take screenshot of component
@@ -30,16 +40,20 @@ const BasketReport = () => {
           border: "1px solid #ccc",
         }}
       >
-        <h1>Invoice #1234</h1>
+        <h1>Invoice No: {OrderData} #1234</h1>
         <p>Customer: John Doe</p>
         <p>Date: 01/09/2025</p>
         <table border="1" cellPadding="5">
           <thead>
-            <tr>
-              <th>Product</th>
+            {OrderData.map((order)=>(
+             <tr>
+              <th>{order}</th>
               <th>Qty</th>
               <th>Price</th>
-            </tr>
+             </tr>
+
+            ))}
+           
           </thead>
           <tbody>
             <tr>
@@ -59,4 +73,4 @@ const BasketReport = () => {
   )
 }
 
-export default BasketReport
+export default OrderByDateReport
