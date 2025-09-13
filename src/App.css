@@ -12,7 +12,14 @@
     animation: App-logo-spin infinite 20s linear;
   }
 }
-
+#pdf-content {
+  width: 100%;
+  min-height: auto;
+}
+thead { display: table-header-group; }
+tfoot { display: table-footer-group; }
+tr { page-break-inside: avoid; }
+table { page-break-inside: auto; }
 .App-header {
   background-color: #282c34;
   min-height: 100vh;
@@ -199,6 +206,18 @@ main{
 height: 100vh !important;
 }
 }
+
+@media print {
+  /* thead { display: table-header-group; }
+  tfoot { display: table-footer-group; }
+  tr { page-break-inside: avoid; } */
+  thead { display: table-header-group; }
+tfoot { display: table-footer-group; }
+tr { page-break-inside: avoid; }
+table { page-break-inside: auto; }
+
+}
+
 
 .card-registration .select-input.form-control[readonly]:not([disabled]) {
 font-size: 1rem;

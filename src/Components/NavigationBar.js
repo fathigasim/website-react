@@ -26,7 +26,7 @@ import {
   CNavItem,
   CNavLink,
 } from '@coreui/react'
-import BasketSummery from "./BasketSummery";
+
 
 const NavigationBar = () => {
  const [visible, setVisible] = useState(false)
@@ -43,7 +43,7 @@ const NavigationBar = () => {
         <CContainer fluid>
           <LanguageSelector />
      
-          <CNavbarBrand href="#">Navbar</CNavbarBrand>
+          <CNavbarBrand href="#">{t("Navbar")}</CNavbarBrand>
           <CNavbarToggler
             aria-label="Toggle navigation"
             aria-expanded={visible}
@@ -52,8 +52,8 @@ const NavigationBar = () => {
           <CCollapse className="navbar-collapse" visible={visible}>
             <CNavbarNav>
               <CNavItem>
-                <CNavLink href="#" active>
-                 {t("Home")} 
+                <CNavLink  active>
+                 <Link to="/">{t("home")}</Link>  
                 </CNavLink>
               </CNavItem>
               <CNavItem>

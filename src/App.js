@@ -29,6 +29,7 @@ import Cancel from './Components/Cancel';
 import OrderList from './Components/OrderList'; 
 import CheckoutButton from './Components/CheckoutButton';
 import CardStyle from './Components/CardStyle';
+import OrderByDateReport from './Components/Reports/OrderByDateReport';
 
 function App() {
    const navigate = useNavigate();
@@ -61,6 +62,7 @@ function App() {
          <Route path='/success' element={<Success/>} />
          <Route path='/cancel' element={<Cancel/>} />
          <Route path='/orderReport' element={<OrderReport/>} />
+         <Route path='/orderDateReport' element={<OrderByDateReport/>} />
      <Route path='/forbiden' element={<Forbiden />} />
      <Route path='*' element={<NotFound />} />
      <Route path='/forgotPassword' element={<ForgotPassword/>} />
