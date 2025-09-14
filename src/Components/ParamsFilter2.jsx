@@ -1,242 +1,235 @@
-// components/ProductFilters.js
+
 import { useSearchParams } from 'react-router-dom';
 import { useCategoryData } from '../hooks/useMyCategory';
-import { Container, Row,Form,Card,Button } from 'react-bootstrap';
-import { useProducts } from '../hooks/useProducts';
+import { Container, Row, Col, Form, Card, Button } from 'react-bootstrap';
 import { useDebounce } from '../hooks/useDebounce';
 import { useEffect, useState } from 'react';
-import PaginationComponent from './Pagination/PaginationComponent';
-import SmartPagination from './SmartPagination';
-import { useQuery,useQueryClient,useMutation } from '@tanstack/react-query';
-import axios from 'axios';
-import SmartPagination2 from './SmartPagination2';
-import '../product.css'
-
+import { useQuery, useQueryClient, useMutation } from '@tanstack/react-query';
 import axiosInstance from '../hooks/axiosInstance';
+import SmartPagination2 from './SmartPagination2';
+import { useTranslation } from 'react-i18next';
+import '../product.css';
+import BasketList from './BasketList';
+import { toast } from "react-toastify";
+
 
 const fetchProducts = async ({ queryKey }) => {
-  const [_key, params] = queryKey;
+  
+  
 
-  const res = await axiosInstance.get("/api/product/ParamsFilter", {
-    params,
-  });
-  console.log(res.data)
+  const [_key, params] = queryKey;
+  const res = await axiosInstance.get("/api/product/ParamsFilter", { params });
   return res.data;
 };
 
 export function ParamFilters() {
-  const queryClient=useQueryClient();
-     const [searchParams, setSearchParams] = useSearchParams();
+  
+  const { t,i18n } = useTranslation("basket");
 
-  // 🔹 Local state for search input (not directly URL bound)
+  const formatCurrency = (value) =>
+  new Intl.NumberFormat(i18n.language, {
+    style: "currency",
+    currency: "SAR"
+  }).format(value);
+
+  const queryClient = useQueryClient();
+  const [searchParams, setSearchParams] = useSearchParams();
+
+  // 🔹 State
   const [searchInput, setSearchInput] = useState(searchParams.get("search") || "");
   const debouncedSearch = useDebounce(searchInput, 600);
 
-  // 🔹 Extract filters from URL (with defaults)
   const pageNumber = parseInt(searchParams.get("pageNumber") || "1", 10);
   const pageSize = parseInt(searchParams.get("pageSize") || "8", 10);
-  // const sort = searchParams.get("sort") || "name";
   const category = searchParams.get("category") || "";
+  const minPrice = searchParams.get("minPrice") || "";
+  const maxPrice = searchParams.get("maxPrice") || "";
+  const sort = searchParams.get("sort") || "priceAsc";
 
-  // 🔹 React Query fetch
+  // 🔹 Fetch products
   const { data, isLoading, isError } = useQuery({
-    queryKey: [
-      "products",
-      { pageNumber, pageSize, search: debouncedSearch
-        // , sort
-        , category }
-    ],
+    queryKey: ["products", { pageNumber, pageSize, search: debouncedSearch, category, minPrice, maxPrice, sort }],
     queryFn: fetchProducts,
     keepPreviousData: true,
   });
-// 🔹 Update URL params when debounced search changes
+
+  const { data: categories } = useCategoryData();
+
+  // 🔹 Update URL params
+  const updateParams = (newParams) => {
+    const updated = new URLSearchParams(searchParams);
+    Object.entries(newParams).forEach(([key, value]) => {
+      if (!value) updated.delete(key);
+      else updated.set(key, value);
+    });
+    setSearchParams(updated);
+  };
+
   useEffect(() => {
     updateParams({ search: debouncedSearch, pageNumber: 1 });
   }, [debouncedSearch]);
 
-  // 🔹 Helper to update URL params
-  const updateParams = (newParams) => {
-    const updated = new URLSearchParams(searchParams);
-    Object.entries(newParams).forEach(([key, value]) => {
-      if (!value) {
-        updated.delete(key);
-      } else {
-        updated.set(key, value);
-      }
-    });
-    setSearchParams(updated);
+  // 🔹 Add to cart
+  const handleAddToCart = async (prodId, inputQnt) => {
+    try {
+      await axiosInstance.post("/api/Basket/AddToBasket",
+        { prodId: Number(prodId), inputQnt: Number(inputQnt) },
+        { headers: { "Content-Type": "application/json" }, withCredentials: true }
+      );
+      
+      toast.success("Product added to cart");
+    } catch (err) {
+     // console.error("AddToCart error:", err.response?.data || err.message);
+      toast.error("Failed to add product to cart");
+      alert("Failed to add product");
+    }
   };
-   const totalPages = Math.ceil(data?.totalItems/data?.pageSize);
-const handleAddToCart = async (prodId,inputQnt) => {
-  try {
-    await axiosInstance.post("/api/Basket/AddToBasket", 
-      {prodId:Number(prodId),inputQnt:Number(inputQnt)}
-    ,{
-        headers: {
-          "Content-Type": "application/json", // 👈 very important
-          
-        },
-        withCredentials: true,
-      });
-    alert("Product added to cart");
-  } catch (err) {
-    console.error("AddToCart error:", err.response?.data || err.message);
-    alert("Failed to add product");
-  }
-};
-   const addCartMut=useMutation({
-         mutationFn:({ prodId, inputQnt })=>handleAddToCart(prodId,inputQnt), onSuccess:()=>{
-             queryClient.invalidateQueries(['basketList']);
-             queryClient.invalidateQueries(['basketsummery']);
-              // reset();
-   // alert("Product added successfully!");
-         },
-         onError:(error)=>{
-           console.log(error)
-           alert("Some went wrong !!!");
-          // reset();
-         }
-       })
-  // 🔹 Loading / error UI
+
+  const addCartMut = useMutation({
+    mutationFn: ({ prodId, inputQnt }) => handleAddToCart(prodId, inputQnt),
+    onSuccess: () => {
+      queryClient.invalidateQueries(['basketList']);
+      queryClient.invalidateQueries(['basketsummery']);
+    },
+    onError: () => alert("Something went wrong!"),
+  });
+
+  // 🔹 Loading / Error
   if (isLoading) return <p>Loading...</p>;
   if (isError) return <p>Something went wrong!</p>;
+
   return (
-    <Container className="mt-4 mb-4" style={{paddingBottom: "60px",marginBottom:'20px !important',bottom:'20px !important'}}>
-  <div className="p-6 max-w-2xl mx-auto">
-      {/* Filters */}
-      <div className="d-flex gap-2 mb-4">
-        {/* Search */}
-        <input
-          type="text"
-          value={searchInput}
-          onChange={(e) => setSearchInput(e.target.value)}
-          placeholder="Search..."
-          className="border p-2 rounded w-full"
-        />
+    <Container className="mt-4 mb-4" style={{ paddingBottom: "60px" }}>
+      <Row><Col md={5} sm={9}><BasketList/></Col></Row>
+      <Row>
+        {/* Sidebar: Categories */}
+        {/* <Col md={3} className="mb-3">
+          <h5>Categories</h5>
+          <Form.Select
+            value={category}
+            onChange={(e) => updateParams({ category: e.target.value, pageNumber: 1 })}
+            className="mb-3"
+          >
+            <option value="">All</option>
+            {categories?.map((cat) => (
+              <option key={cat.id} value={cat.categoryId}>{cat.categoryName}</option>
+            ))}
+          </Form.Select>
+        </Col> */}
+        <Col md={3} className="mb-3 p-3 bg-light rounded shadow-sm">
+  <h5 className="mb-3">Filters</h5>
 
-        {/* Category */}
-        <select
-          value={category}
-          onChange={(e) => updateParams({ category: e.target.value, pageNumber: 1 })}
-          className="border p-2 rounded"
-        >
-          <option value="">All</option>
-          <option value="electronics">Electronics</option>
-          <option value="books">Books</option>
-        </select>
+  <label className="form-label">Category</label>
+  <Form.Select
+    value={category}
+    onChange={(e) => updateParams({ category: e.target.value, pageNumber: 1 })}
+    className="mb-3"
+  >
+    <option value="">All</option>
+    {categories?.map((cat) => (
+      <option key={cat.id} value={cat.categoryId}>{cat.categoryName}</option>
+    ))}
+  </Form.Select>
 
-        {/* Sort */}
-        {/* <select
-          value={sort}
-          onChange={(e) => updateParams({ sort: e.target.value })}
-          className="border p-2 rounded"
-        >
-          <option value="name">Name</option>
-          <option value="price">Price</option>
-        </select> */}
-      </div>
+  <label className="form-label">Price Range</label>
+  <div className="d-flex gap-2 mb-3">
+    <Form.Control
+      type="number"
+      placeholder="Min"
+      value={minPrice}
+      onChange={(e) => updateParams({ minPrice: e.target.value, pageNumber: 1 })}
+    />
+    <Form.Control
+      type="number"
+      placeholder="Max"
+      value={maxPrice}
+      onChange={(e) => updateParams({ maxPrice: e.target.value, pageNumber: 1 })}
+    />
+  </div>
 
-      {/* Product List */}
-      {data.items ? (
-        <Container>
-    <div className="card-grid">
-      {data?.items?.map((product) => (
-        <Card
-          key={product.goodsId}
-          className="h-100 shadow-sm"
-          style={{ border: "1px solid #faf8f8ff" }}
-        >
-          <Card.Img
-            variant="top"
-            style={{ width: "100%", height: "10rem", objectFit: "cover" }}
-            src={product.imgSrc}
-            alt={product.goodsName}
-          />
-          <Card.Body className="d-flex flex-column">
-            <Card.Title>{product.goodsName}</Card.Title>
-            <Card.Text className="flex-grow-1">{product.goodsDetail}</Card.Text>
+  <Button variant="secondary" size="sm" onClick={() => updateParams({ category: '', minPrice: '', maxPrice: '', pageNumber: 1 })}>
+    Clear Filters
+  </Button>
+</Col>
 
-            <Form
-              onSubmit={(e) => {
-                e.preventDefault();
-                const qnt = parseInt(
-                  e.target.elements[`qnt-${product.goodsId}`].value,
-                  10
-                );
-                if (!qnt || qnt <= 0) {
-                  alert("Please enter a valid quantity");
-                  return;
-                }
-                addCartMut.mutate({ prodId: product.goodsId, inputQnt: qnt });
-                e.target.reset();
-              }}
-            >
+
+        {/* Main: Search + Sort + Products */}
+        <Col md={9}>
+          {/* Filters: Search + Sort */}
+          <Row className="mb-3">
+            <Col md={6} className="mb-2">
               <Form.Control
-                type="number"
-                name={`qnt-${product.goodsId}`}
-                placeholder="Qty"
-                min="1"
-                required
-                className="mb-2"
+                type="text"
+                placeholder="Search products..."
+                value={searchInput}
+                onChange={(e) => setSearchInput(e.target.value)}
               />
-              <Button
-                type="submit"
-                variant="primary"
-                size="sm"
-                disabled={addCartMut.isLoading}
-                className="w-100"
+            </Col>
+            <Col md={6} className="mb-2">
+              <Form.Select
+                value={sort}
+                onChange={(e) => updateParams({ sort: e.target.value, pageNumber: 1 })}
               >
-                {addCartMut.isLoading ? "Adding..." : "Add To Cart"}
-              </Button>
-            </Form>
+                <option value="priceAsc">Price: Low to High</option>
+                <option value="priceDesc">Price: High to Low</option>
+              </Form.Select>
+            </Col>
+          </Row>
 
-          </Card.Body>
-        </Card>
-      ))}
-    </div>
-    </Container>
-    ):('no data found sorry')}
-      
+          {/* Product Cards */}
+          {data.items && data.items.length > 0 ? (
+            <div className="card-grid">
+              {data.items.map(product => (
+                <Card key={product.goodsId} className="product-card mb-3 shadow-sm">
+  <div className="position-relative">
+    <Card.Img
+      src={product.imgSrc}
+      alt={product.goodsName}
+      style={{ height: "220px", objectFit: "cover" }}
+    />
+    <span className="position-absolute top-0 end-0 badge bg-primary m-2"> {formatCurrency(product.price )}</span>
+  </div>
+  <Card.Body className="d-flex flex-column">
+    <Card.Title className="mb-1">{product.goodsName}</Card.Title>
+    <Card.Text className="flex-grow-1 text-muted">{product.goodsDetail}</Card.Text>
 
-     {/* Pagination */}
-<div className="flex justify-between items-center mt-4">
-  {/* <button
-    disabled={pageNumber === 1}
-    onClick={() => updateParams({ pageNumber: pageNumber - 1 })}
-    className="px-3 py-1 border rounded disabled:opacity-50"
-  >
-    Prev
-  </button>
+    <Form
+      onSubmit={(e) => {
+        e.preventDefault();
+        const qnt = parseInt(e.target.elements[`qnt-${product.goodsId}`].value, 10);
+        if (!qnt || qnt <= 0) return alert("Please enter a valid quantity");
+        addCartMut.mutate({ prodId: product.goodsId, inputQnt: qnt });
+        e.target.reset();
+      }}
+    >
+      <div className="d-flex gap-2">
+        <Form.Control type="number" name={`qnt-${product.goodsId}`} placeholder="Qty" min="1" />
+        <Button type="submit"  style={{ backgroundColor: "#2c3e50 !important" }} className="flex-shrink-0">Add</Button>
+      </div>
+    </Form>
+  </Card.Body>
+</Card>
 
-  <span>
-    Page {pageNumber} of {totalPages}
-  </span>
+              ))}
+            </div>
+          ) : (
+            <p>No products found</p>
+          )}
 
-  <button
-    disabled={pageNumber === totalPages}
-    onClick={() => updateParams({ pageNumber: pageNumber + 1 })}
-    className="px-3 py-1 border rounded disabled:opacity-50"
-  >
-    Next
-    
-  </button> */}
-
-{/* <SmartPagination
-  pageNumber={pageNumber}
-  totalPages={Math.ceil(data?.totalItems/data?.pageSize)}
-  onPageChange={(page) => updateParams({ pageNumber: page })}
-/> */}
-
-<SmartPagination2   pageNumber={pageNumber}
-  totalPages={Math.ceil(data?.totalItems/data?.pageSize)}
-  onPageChange={(page) => updateParams({ pageNumber: page })}/>
+          <div className="d-flex justify-content-center mt-4 mb-4">
+            {data.items.length > 0 && 
+  <SmartPagination2
+    pageNumber={pageNumber}
+    totalPages={Math.ceil(data?.totalItems / data?.pageSize)}
+    onPageChange={(page) => updateParams({ pageNumber: page })}
+  />
+  }
 </div>
 
-      </div>
+        </Col>
+      </Row>
     </Container>
-      )}
-  
-    
-   
+  );
+}
 
-export default ParamFilters
+export default ParamFilters;

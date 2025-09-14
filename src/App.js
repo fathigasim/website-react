@@ -30,17 +30,26 @@ import OrderList from './Components/OrderList';
 import CheckoutButton from './Components/CheckoutButton';
 import CardStyle from './Components/CardStyle';
 import OrderByDateReport from './Components/Reports/OrderByDateReport';
+import { useTranslation } from 'react-i18next';
+import { ToastContainer } from "react-toastify";
+import "react-toastify/dist/ReactToastify.css";
 
 function App() {
-   const navigate = useNavigate();
-   useEffect(() => {
-        setNavigate(navigate);
-      }, [navigate]);
+  //  const navigate = useNavigate();
+  //  useEffect(() => {
+  //       setNavigate(navigate);
+  //     }, [navigate]);
+  const { i18n } = useTranslation();
+  if (i18n.language === "ar") {
+    require("bootstrap/dist/css/bootstrap.rtl.min.css");
+  } else {
+    require("bootstrap/dist/css/bootstrap.min.css");
+  }
 
   return (
  <>
  <AuthProvider>
-        <NavigationBar />
+        <div dir={i18n.language === "ar" ? "rtl" : "ltr"}><NavigationBar /></div>  
      <Routes>
      <Route path='/login' element={<Login />} />
      <Route path='/' element={<MainPage />} />
@@ -75,6 +84,7 @@ function App() {
 
      <MainFooter/>
      </AuthProvider>
+      <ToastContainer position="top-right" autoClose={3000} />
      </>
 
   );

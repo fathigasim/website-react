@@ -240,9 +240,13 @@ const BasketList = () => {
                       variant="danger"
                       size="sm"
                       className="mt-auto"
-                      onClick={() =>
-                        removeBasketItemMut.mutate({ prodId: Number(item.id) })
-                      }
+                      onClick={(id) =>{
+                        
+  if (window.confirm("Are you sure you want to delete this item?")) {
+      removeBasketItemMut.mutate(
+                          { prodId: Number(item.id) });
+                          console.log("Deleted:", id);
+                        }}}
                     >
                       Remove
                     </Button>
