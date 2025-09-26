@@ -1,0 +1,37 @@
+trigger:
+  branches:
+    include:
+      - main   # adjust if needed
+
+pool:
+  vmImage: 'ubuntu-latest'
+
+variables:
+  azureServiceConnection: 'AzureServiceConnection'
+  frontendAppName: 'my-frontend-app'
+
+steps:
+- task: NodeTool@0
+  inputs:
+    versionSpec: '18.x'
+
+- script: |
+    npm ci
+    npm run build
+  displayName: "Build React App"
+
+- task: ArchiveFiles@2
+  displayName: "Archive build output"
+  inputs:
+    rootFolderOrFile: 'build'
+    includeRootFolder: false
+    archiveType: 'zip'
+    archiveFile: '$(Build.ArtifactStagingDirectory)/frontend.zip'
+    replaceExistingArchive: true
+
+- task: AzureWebApp@1
+  displayName: Deploy frontend
+  inputs:
+    azureSubscription: '$(azureServiceConnection)'
+    appName: '$(frontendAppName)'
+    package: '$(Build.ArtifactStagingDirectory)/frontend.zip'
